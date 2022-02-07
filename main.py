@@ -1,11 +1,12 @@
 import time
-import random
+from random import randint
 from sys import exit
 from textwrap import dedent
 
 # I'm going to use global vars b/c this isn't going to prod, ever.
 deathArt = open("death_art.txt")
 clock = ['2 AM', '2:30 AM', '3 AM', '3:30 AM', '4 AM', '4:30 AM', '5 AM', '5:30 AM', '6 AM']
+# clock = ['2 AM', '3 AM', '4 AM', '5 AM', '6 AM']
 timeIndex = 0
 
 def wait(pause):
@@ -17,7 +18,7 @@ class Death(object):
         print(deathArt.read())
         deathArt.close()
         wait(0.5)
-        print("\nYou died.")
+        print("You died.")
         exit(1)
 
 # Midnight is the opening scene, not requiring action from the player. It set the scene and explains how to play
@@ -56,7 +57,7 @@ class Midnight(object):
         """))
     
         while True:
-            ready = input("\nType 'y' when you're ready to begin the shift:\n> ")
+            ready = input("\nType 'y' when you're ready to begin the shift:\n>")
 
             if ready == "y":
                 return "hallway_empty"
@@ -86,19 +87,104 @@ class Midnight(object):
 # Shining the flashlight won't do anything.
 class HallwayEmpty(object):
     def start(self):
-        print("Awesome, you win.")
-        return "six-am"
+        print("The hallway is empty. Might be a good idea to check the camera.")
+
+        while True:
+            action = input("mask, shine, check, time:\n>")
+
+            if action == "mask":
+                print("Good precaution. You raise your mask for a sec.")
+            elif action == "shine":
+                print("You flash your light down the hallway. Still empty.")
+            elif action == "check":
+                coinToss = randint(0, 1)
+
+                if coinToss:
+                    print("...")
+                    wait(0.5)
+                    print("...Fredbear is gone.")
+                    wait(1.5)
+
+                    rollDie = randint(0, 2)
+                    fredSceneArray = [
+                        "fredbear_far",
+                        "fredbear_near",
+                        "fredbear_at_desk"
+                    ]
+                    return fredSceneArray[rollDie]
+                else:
+                    print("Phew, Fredbear is still in storage...and still looking right at me.\n")
+                    global timeIndex 
+                    timeIndex += 1
+                    return "hallway_empty"
+            elif action == "time":
+                print(f"The time is currently {clock[timeIndex]}")
+                    
 
 # Descriptive text about Fredbear appearing at end of hallway. 'Shine' action will flip a coin; heads = Fredbear goes back and hour is incremented by 1.
 # Tails = either FredbearNear or FredbearAtDesk is sent.
 class FredbearFar(object):
     def start(self):
-        exit(1)
+        print("You lower the camera and catch something at the end of the hall.\n\nIt's Fredbear.")
+        while True:
+            action = input("mask, shine, check, time:\n>")
+
+            if action == "mask":
+                print("You raise your mask, but I'm not sure if it makes a difference from here.")
+            elif action == "shine":
+                print("You flash your light down the hallway.")
+                coinToss = randint(0, 1)
+                if coinToss:
+                    print("Thank god, it worked. Fredbear resets and returns to storage.")
+                    global timeIndex
+                    timeIndex += 1
+                    return "hallway_empty"
+                else:
+                    print("The light didn't seem to work...")
+                    fredbearMovement = randint (0, 1)
+                    fredSceneArray = [
+                        "fredbear_near",
+                        "fredbear_at_desk"
+                    ]
+                    return fredSceneArray[fredbearMovement]
+            elif action == "check":
+                print("You check the camera for no good reason, and Fredbear advances.\n")
+                fredbearMovement = randint (0, 1)
+                fredSceneArray = [
+                    "fredbear_near",
+                    "fredbear_at_desk"
+                ]
+                return fredSceneArray[fredbearMovement]
+            elif action == "time":
+                print(f"The time is currently {clock[timeIndex]}")
 
 # Fredbear is near the office. Same mechanics for 'shine' action as FredbearFar, except 'tails' sends FredbearAtDesk.
 class FredbearNear(object):
     def start(self):
-        exit(1)
+        print("Dear lord...Fredbear is standing just outside the office.")
+        while True:
+            action = input("mask, shine, check, time:\n>")
+
+            if action == "mask":
+                print("You raise your mask, but Fredbear is still too far away to examine it.")
+            elif action == "shine":
+                print("You flash your light directly at Fredbear.")
+                coinToss = randint(0, 1)
+                if coinToss:
+                    print("Thank god, it worked. Fredbear resets and returns to storage.")
+                    global timeIndex
+                    timeIndex += 1
+                    return "hallway_empty"
+                else:
+                    print("You flash the light, but Fredbear doesn't care.")
+                    wait(1)
+                    return "fredbear_at_desk"
+            elif action == "check":
+                print("You check the camera at an awful time. The storage room is obviously empty.\n")
+                wait(1)
+                return "fredbear_at_desk"
+            elif action == "time":
+                print(f"The time is currently {clock[timeIndex]}")
 
 # This scene is the only one where the player can die. A 4-second countdown is set, and if the player doesn't put on the mask in time, the Death scene is sent.
 # If player sends mask action in time:
@@ -107,12 +193,25 @@ class FredbearNear(object):
     # - HallwayEmpty is sent
 class FredbearAtDesk(object):
     def start(self):
-        exit(1)
+        print("FREDBEAR IS AT YOUR DESK. LIFT YOUR MASK NOW.")
+
+        action = input("mask, mask, mask\n>")
+
+        if action == "mask":
+            print("You raise your mask in the nick of time. Fredbear returns to storage.")
+            global timeIndex
+            timeIndex += 1
+            return "hallway_empty"
+        else:
+            print("Wrong move.")
+            wait(1)
+            return "death"
+        
 
 # When timeArray = 8, this scene is sent, player wins, game is exited
 class SixAm(object):
     def start(self):
-        print('Yay you win')
+        print("It's 6 AM! The sun comes out, and Fredbear heads for the stage.")
         exit(1)
 
 class Engine(object):
@@ -124,7 +223,7 @@ class Engine(object):
         current_scene = self.scene_map.opening_scene()
         last_scene = self.scene_map.next_scene('six-am')
 
-        while timeIndex != 8:
+        while timeIndex < 8:
             next_scene_name = current_scene.start()
             current_scene = self.scene_map.next_scene(next_scene_name)
 
