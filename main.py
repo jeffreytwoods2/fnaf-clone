@@ -3,10 +3,8 @@ from random import randint
 from sys import exit
 from textwrap import dedent
 
-# I'm going to use global vars b/c this isn't going to prod, ever.
 deathArt = open("death_art.txt")
 clock = ['2 AM', '2:30 AM', '3 AM', '3:30 AM', '4 AM', '4:30 AM', '5 AM', '5:30 AM', '6 AM']
-# clock = ['2 AM', '3 AM', '4 AM', '5 AM', '6 AM']
 timeIndex = 0
 
 def wait(pause):
@@ -21,7 +19,6 @@ class Death(object):
         print("You died.")
         exit(1)
 
-# Midnight is the opening scene, not requiring action from the player. It set the scene and explains how to play
 class Midnight(object):
 
     def start(self):
@@ -44,7 +41,7 @@ class Midnight(object):
             to find the nearest human...which would be you during the night shift.
 
             He also seems to act more aggressive toward adults at night, which is why we needed a night guard
-            ...so he doesn't escape and cause any harm in town. If you seem him appear in the hallway, flash your
+            ...so he doesn't escape and cause any harm in town. If you see him appear in the hallway, flash your
             light in his eyes; that seems to reset his circuits and send him back to the storage room.
 
             If it doesn't quite work for some reason and Fredbear is upon you, I've provided you with a spare animatronic mask. Put it over
@@ -77,14 +74,7 @@ class Midnight(object):
             else:
                 print("You mistyped something, Fredbear runs up and kills you immediately.")
                 exit(1)
-        # Print out the instructions of what actions to type
-        # shine = shine flashlight in Fredbear's eyes
-        # check = check the storage room camera for Fredbear. There's a 50/50 chance he'll be there
-            # If he's there, time increments by 1 and HallwayEmpty is sent again.
-            # If he's gone, a "3-sided die" is rolled and a random Fredbear scene is sent
 
-# This is the scene where the player may begin to play. Checking the camera here is explained in Midnight class.
-# Shining the flashlight won't do anything.
 class HallwayEmpty(object):
     def start(self):
         print("The hallway is empty. Might be a good idea to check the camera.")
@@ -113,16 +103,15 @@ class HallwayEmpty(object):
                     ]
                     return fredSceneArray[rollDie]
                 else:
-                    print("Phew, Fredbear is still in storage...and still looking right at me.\n")
+                    print("Phew, Fredbear is still in storage...can he see me through the camera...?\n")
                     global timeIndex 
                     timeIndex += 1
                     return "hallway_empty"
             elif action == "time":
                 print(f"The time is currently {clock[timeIndex]}")
+            else:
+                print("Typo? I didn't quite catch that.")
                     
-
-# Descriptive text about Fredbear appearing at end of hallway. 'Shine' action will flip a coin; heads = Fredbear goes back and hour is incremented by 1.
-# Tails = either FredbearNear or FredbearAtDesk is sent.
 class FredbearFar(object):
     def start(self):
         print("You lower the camera and catch something at the end of the hall.\n\nIt's Fredbear.")
@@ -157,8 +146,9 @@ class FredbearFar(object):
                 return fredSceneArray[fredbearMovement]
             elif action == "time":
                 print(f"The time is currently {clock[timeIndex]}")
+            else:
+                print("Typo? I didn't quite catch that.")
 
-# Fredbear is near the office. Same mechanics for 'shine' action as FredbearFar, except 'tails' sends FredbearAtDesk.
 class FredbearNear(object):
     def start(self):
         print("Dear lord...Fredbear is standing just outside the office.")
@@ -185,12 +175,9 @@ class FredbearNear(object):
                 return "fredbear_at_desk"
             elif action == "time":
                 print(f"The time is currently {clock[timeIndex]}")
+            else:
+                print("Typo? I didn't quite catch that.")
 
-# This scene is the only one where the player can die. A 4-second countdown is set, and if the player doesn't put on the mask in time, the Death scene is sent.
-# If player sends mask action in time:
-    # - a message explains that Fredbear has returned to the storage room
-    # - timeIndex is incremented by 1
-    # - HallwayEmpty is sent
 class FredbearAtDesk(object):
     def start(self):
         print("FREDBEAR IS AT YOUR DESK. LIFT YOUR MASK NOW.")
@@ -207,15 +194,12 @@ class FredbearAtDesk(object):
             wait(1)
             return "death"
         
-
-# When timeArray = 8, this scene is sent, player wins, game is exited
 class SixAm(object):
     def start(self):
         print("It's 6 AM! The sun comes out, and Fredbear heads for the stage.")
         exit(1)
 
 class Engine(object):
-
     def __init__(self, scene_map):
         self.scene_map = scene_map
 
