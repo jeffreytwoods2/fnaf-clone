@@ -5,7 +5,7 @@ from textwrap import dedent
 
 # I'm going to use global vars b/c this isn't going to prod, ever.
 deathArt = open("death_art.txt")
-time = ['2am', '2:30am', '3am', '3:30am', '4am', '4:30am', '5am', '5:30am', '6am']
+clock = ['2 AM', '2:30 AM', '3 AM', '3:30 AM', '4 AM', '4:30 AM', '5 AM', '5:30 AM', '6 AM']
 timeIndex = 0
 
 def wait(pause):
@@ -16,6 +16,7 @@ class Death(object):
     def start(self):
         print(deathArt.read())
         deathArt.close()
+        wait(0.5)
         print("\nYou died.")
         exit(1)
 
@@ -23,42 +24,58 @@ class Death(object):
 class Midnight(object):
 
     def start(self):
-        print("*phone rings*")
-        wait(0.75)
         print(dedent("""
+            *phone rings*
+
             Hey there, welcome to your first night on the job!
             Our pizzeria provides the best in animatronic entertainment
             for the children of our community.
-        """))
-        wait(1)
-        print(dedent("""
+
             Fredbear, our lead animatronic, is equipped with quite the advanced AI.
             When the pizzeria closes, he shows himself off stage and stores himself in the backroom.
-        """))
-        wait(1)
-        print(dedent("""
+
             I'll let you in on another secret: his eyes are cameras, equipped with face-recognition technology.
             We've teamed up with state law enforcement to help identify predators who may be attending 
             childrens' parties illegally.
-        """))
-        wait(1.5)
-        print(dedent("""
+
             Unfortunately, we haven't worked out every kink, and Fredbear still doesn't have a proper night
             mode. When the pizza place is closed, he believes that he's in the wrong room and heads out 
             to find the nearest human...which would be you during the night shift.
-        """))
-        wait(1.5)
-        print(dedent("""
+
             He also seems to act more aggressive toward adults at night, which is why we needed a night guard
             ...so he doesn't escape and cause any harm in town. If you seem him appear in the hallway, flash your
             light in his eyes; that seems to reset his circuits and send him back to the storage room.
-        """))
-        wait(1.5)
-        print(dedent("""
-            If it doesn't quite work for some reason, I've provided you with a spare animatronic mask. Put it over
+
+            If it doesn't quite work for some reason and Fredbear is upon you, I've provided you with a spare animatronic mask. Put it over
             your face, and Fredbear will assume that you're just another robobt and leave the room.
+
+            Type 'mask' (no quotes) to quickly put on your mask.
+            Type 'check' to check the security camera in the storage room.
+            Type 'shine' to shine your flashlight in Fredbear's eyes.
+            Type 'time' to check the time of night.
         """))
-        wait(1)
+    
+        while True:
+            ready = input("\nType 'y' when you're ready to begin the shift:\n> ")
+
+            if ready == "y":
+                return "hallway_empty"
+
+            elif ready == "mask":
+                print("Um, ok, you randomly raise your mask.")
+
+            elif ready == "check":
+                print("Fredbear is there in storage, where he should be...and he's looking directly into the camera...")
+            
+            elif ready == "shine":
+                print("You shine your light on the empty hallway.")
+
+            elif ready == "time":
+                print(f"The time is currently {clock[timeIndex]}")
+
+            else:
+                print("You mistyped something, Fredbear runs up and kills you immediately.")
+                exit(1)
         # Print out the instructions of what actions to type
         # shine = shine flashlight in Fredbear's eyes
         # check = check the storage room camera for Fredbear. There's a 50/50 chance he'll be there
@@ -69,7 +86,8 @@ class Midnight(object):
 # Shining the flashlight won't do anything.
 class HallwayEmpty(object):
     def start(self):
-        exit(1)
+        print("Awesome, you win.")
+        return "six-am"
 
 # Descriptive text about Fredbear appearing at end of hallway. 'Shine' action will flip a coin; heads = Fredbear goes back and hour is incremented by 1.
 # Tails = either FredbearNear or FredbearAtDesk is sent.
@@ -94,6 +112,7 @@ class FredbearAtDesk(object):
 # When timeArray = 8, this scene is sent, player wins, game is exited
 class SixAm(object):
     def start(self):
+        print('Yay you win')
         exit(1)
 
 class Engine(object):
@@ -105,7 +124,7 @@ class Engine(object):
         current_scene = self.scene_map.opening_scene()
         last_scene = self.scene_map.next_scene('six-am')
 
-        while timeIndex < 8:
+        while timeIndex != 8:
             next_scene_name = current_scene.start()
             current_scene = self.scene_map.next_scene(next_scene_name)
 
@@ -113,13 +132,13 @@ class Engine(object):
 
 class Map(object):
     scenes = {
-        # 'midnight': Midnight(),
-        # 'hallway_empty': HallwayEmpty(),
-        # 'fredbear_far': FredbearFar(),
-        # 'fredbear_near': FredbearNear(),
-        # 'fredbear_at_desk': FredbearAtDesk(),
+        'midnight': Midnight(),
+        'hallway_empty': HallwayEmpty(),
+        'fredbear_far': FredbearFar(),
+        'fredbear_near': FredbearNear(),
+        'fredbear_at_desk': FredbearAtDesk(),
         'death': Death(),
-        # 'six-am': SixAm(),
+        'six-am': SixAm(),
     }
 
     def __init__(self, start_scene):
@@ -132,6 +151,6 @@ class Map(object):
     def opening_scene(self):
         return self.next_scene(self.start_scene)
 
-start_scene = Map('death')
-start_engine = Engine(start_scene)
+first_scene = Map('midnight')
+start_engine = Engine(first_scene)
 start_engine.play()
