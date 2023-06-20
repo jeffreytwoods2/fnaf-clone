@@ -1,25 +1,21 @@
-import time
+from time import sleep
 from random import randint
 from sys import exit
 from textwrap import dedent
 
-deathArt = open("death_art.txt")
 clock = ['2 AM', '2:30 AM', '3 AM', '3:30 AM', '4 AM', '4:30 AM', '5 AM', '5:30 AM', '6 AM']
 timeIndex = 0
 
-def wait(pause):
-    time.sleep(pause)
-
-class Death(object):
+class Death():
 
     def start(self):
-        print(deathArt.read())
-        deathArt.close()
-        wait(0.5)
+        with open("death_art.txt", "r") as ded:
+            print(ded.read())
+        sleep(0.5)
         print("You died.")
         exit(1)
 
-class Midnight(object):
+class Midnight():
 
     def start(self):
         print(dedent("""
@@ -75,7 +71,7 @@ class Midnight(object):
                 print("You mistyped something, Fredbear runs up and kills you immediately.")
                 exit(1)
 
-class HallwayEmpty(object):
+class HallwayEmpty():
     def start(self):
         print("The hallway is empty. Might be a good idea to check the camera.")
 
@@ -91,9 +87,9 @@ class HallwayEmpty(object):
 
                 if coinToss:
                     print("...")
-                    wait(0.5)
+                    sleep(0.5)
                     print("...Fredbear is gone.")
-                    wait(1.5)
+                    sleep(1.5)
 
                     rollDie = randint(0, 2)
                     fredSceneArray = [
@@ -112,7 +108,7 @@ class HallwayEmpty(object):
             else:
                 print("Typo? I didn't quite catch that.")
                     
-class FredbearFar(object):
+class FredbearFar():
     def start(self):
         print("You lower the camera and catch something at the end of the hall.\n\nIt's Fredbear.")
         while True:
@@ -149,7 +145,7 @@ class FredbearFar(object):
             else:
                 print("Typo? I didn't quite catch that.")
 
-class FredbearNear(object):
+class FredbearNear():
     def start(self):
         print("Dear lord...Fredbear is standing just outside the office.")
         while True:
@@ -167,18 +163,18 @@ class FredbearNear(object):
                     return "hallway_empty"
                 else:
                     print("You flash the light, but Fredbear doesn't care.")
-                    wait(1)
+                    sleep(1)
                     return "fredbear_at_desk"
             elif action == "check":
                 print("You check the camera at an awful time. The storage room is obviously empty.\n")
-                wait(1)
+                sleep(1)
                 return "fredbear_at_desk"
             elif action == "time":
                 print(f"The time is currently {clock[timeIndex]}")
             else:
                 print("Typo? I didn't quite catch that.")
 
-class FredbearAtDesk(object):
+class FredbearAtDesk():
     def start(self):
         print("FREDBEAR IS AT YOUR DESK. LIFT YOUR MASK NOW.")
 
@@ -191,15 +187,15 @@ class FredbearAtDesk(object):
             return "hallway_empty"
         else:
             print("Wrong move.")
-            wait(1)
+            sleep(1)
             return "death"
         
-class SixAm(object):
+class SixAm():
     def start(self):
         print("It's 6 AM! The sun comes out, and Fredbear heads for the stage.")
         exit(1)
 
-class Engine(object):
+class Engine():
     def __init__(self, scene_map):
         self.scene_map = scene_map
 
@@ -213,7 +209,7 @@ class Engine(object):
 
         last_scene.start()
 
-class Map(object):
+class Map():
     scenes = {
         'midnight': Midnight(),
         'hallway_empty': HallwayEmpty(),
